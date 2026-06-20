@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RespiriX - Premium Virtual Lab</title>
+    <style>
+        :root {
+            --bg-dark: #090d16;
+            --card-bg: rgba(17, 24, 39, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --primary-glow: #00f2fe;
+            --secondary-glow: #4facfe;
+            --accent-red: #ff3366;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --breathe-duration: 4s;
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+            scroll-behavior: smooth;
+        }
+        
+        body { 
+            background-color: var(--bg-dark); 
+            color: var(--text-main); 
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 242, 254, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(79, 172, 254, 0.05) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        /* Custom Scrollbar biar keliatan mahal */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; border: 2px solid var(--bg-dark); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--secondary-glow); }
+
+        /* FLOATING GLASS NAVBAR */
+        nav {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 900px;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            animation: floatNav 3s ease-in-out infinite;
+        }
+
+        @keyframes floatNav {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-5px); }
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 20px;
+            background: linear-gradient(45deg, var(--primary-glow), var(--secondary-glow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .nav-links { display: flex; gap: 8px; }
+        
+        button.tab-btn { 
+            padding: 8px 16px; 
+            cursor: pointer; 
+            background: transparent; 
+            border: none; 
+            color: var(--text-muted); 
+            border-radius: 20px; 
+            font-weight: 600; 
+            font-size: 14px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+        
+        button.tab-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
+        button.tab-btn.active { 
+            background: linear-gradient(135deg, var(--primary-glow), var(--secondary-glow)); 
+            color: #000; 
+            font-weight: 700;
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.4); 
+        }
+        
+        /* MAIN CONTAINERS */
+        main {
+            margin-top: 120px;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 150px);
+            width: 100%;
+        }
+
+        .content-section {
+            width: 100%;
+            max-width: 1200px;
+            display: none;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .content-section.active {
+            display: block;
+            animation: sectionReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes sectionReveal {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* GLASS CARD SCROLL ANIMATION EFFECT */
+        .reveal-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 35px;
+            margin-bottom: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal-card:hover {
+            border-color: rgba(0, 242, 254, 0.2);
+            box-shadow: 0 25px 50px rgba(0, 242, 254, 0.05);
+        }
+
+        h2 {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #fff, #9ca3af);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p { font-size: 16px; line-height: 1.7; color: var(--text-muted); }
+        ul, ol { margin-left: 20px; color: var(--text-muted); line-height: 1.8;}
+        li { margin-bottom: 8px; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+
+        /* PREMIUM SIMULATOR INTERFACE */
+        .sim-grid { display: grid; grid-template-columns: 320px 1fr; gap: 30px; }
+        
+        .glass-panel {
+            background: rgba(10, 15, 26, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 25px;
+        }
+
+        .control-group { margin-bottom: 20px; }
+        .control-group label { display: block; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 10px; }
+        
+        select {
+            width: 100%;
+            padding: 14px;
+            background: #111827;
+            border: 1px solid var(--border-color);
+            color: #fff;
+            border-radius: 12px;
+            font-size: 15px;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        select:focus { border-color: var(--primary-glow); box-shadow: 0 0 10px rgba(0, 242, 254, 0.2); }
+
+        /* BUTTON ANIMATIONS (PREMIUM) */
+        button.action-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            color: #000;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        button.start-btn { background: linear-gradient(135deg, #00f2fe, #4facfe); }
+        button.start-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0, 242, 254, 0.3); }
+        
+        button.reset-btn { background: transparent; border: 1px solid var(--border-color); color: #fff; }
+        button.reset-btn:hover { background: rgba(255,255,255,0.05); color: var(--accent-red); border-color: var(--accent-red); }
+        button.action-btn:active { transform: translateY(1px); }
+
+        /* VISUALIZATION AND MONITOR */
+        .display-stage {
+            background: radial-gradient(circle at center, #111827 0%, #070a12 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            position: relative;
+        }
+
+        .lungs-box { display: flex; gap: 30px; margin-bottom: 40px; position: relative; }
+        
+        /* Smooth Glow Lung Animation */
+        .lung-art { 
+            width: 90px; 
+            height: 140px; 
+            background: linear-gradient(135deg, #ff3366, #ff6b6b); 
+            border-radius: 45px 45px 25px 25px; 
+            animation: expand var(--breathe-duration) infinite ease-in-out; 
+            animation-play-state: paused;
+            transform-origin: bottom center; 
+            opacity: 0.8; 
+            filter: drop-shadow(0 0 15px rgba(255, 51, 102, 0.3));
+        }
+        .lung-art.left { border-radius: 45px 20px 25px 45px; }
+        .lung-art.right { border-radius: 20px 45px 45px 25px; }
+        
+        @keyframes expand {
+            0%, 100% { transform: scale(0.92); opacity: 0.6; filter: drop-shadow(0 0 10px rgba(255, 51, 102, 0.2)); }
+            50% { transform: scale(1.12); opacity: 1; filter: drop-shadow(0 0 30px rgba(255, 51, 102, 0.6)); }
+        }
+
+        .hud-monitor {
+            display: flex;
+            gap: 40px;
+            background: rgba(255,255,255,0.02);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border-color);
+            padding: 15px 35px;
+            border-radius: 16px;
+        }
+        .hud-card { text-align: center; }
+        .hud-num { font-size: 36px; font-weight: 900; background: linear-gradient(to bottom, #fff, #9ca3af); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hud-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-top: 5px; }
+
+        /* TABLE AND CONTENT ACCENTS */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: rgba(0,0,0,0.2); border-radius: 12px; overflow: hidden; }
+        th, td { padding: 14px; text-align: center; border-bottom: 1px solid var(--border-color); font-size: 14px; }
+        th { background: rgba(255,255,255,0.03); color: var(--primary-glow); font-weight: 700; }
+        td { color: var(--text-muted); }
+        tr:hover td { color: #fff; background: rgba(255,255,255,0.01); }
+
+        .dev-badge {
+            background: linear-gradient(135deg, rgba(0,242,254,0.1), rgba(79,172,254,0.1));
+            border: 1px solid rgba(0,242,254,0.2);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            margin: 40px auto;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">RESPIRIX</div>
+        <div class="nav-links">
+            <button class="tab-btn active" onclick="switchSection('teori-sec', event)">Teori</button>
+            <button class="tab-btn" onclick="switchSection('prosedur-sec', event)">Prosedur</button>
+            <button class="tab-btn" onclick="switchSection('simulasi-sec', event)">Simulasi</button>
+            <button class="tab-btn" onclick="switchSection('lkpd-sec', event)">LKPD</button>
+            <button class="tab-btn" onclick="switchSection('dev-sec', event)">Developer</button>
+        </div>
+    </nav>
+
+    <main>
+        
+        <div id="teori-sec" class="content-section active">
+            <div class="reveal-card">
+                <h2>📚 Fisiologi Sistem Respirasi Manusia</h2>
+                <p>Proses respirasi pada manusia merupakan sistem mekanis-biologis kompleks yang krusial untuk mempertahankan homeostasis seluler melalui suplai Oksigen (O₂) dan eliminasi Karbondioksida (CO₂).</p>
+            </div>
+            <div class="grid-2">
+                <div class="reveal-card">
+                    <h3 style="color: var(--primary-glow); margin-bottom: 10px;">1. Dinamika Mekanisme Ventilasi</h3>
+                    <p style="font-size:14px;">Ventilasi paru terbagi menjadi konduksi inspirasi aktif dan ekspirasi pasif:</p>
+                    <ul style="margin-top:10px; font-size:14px;">
+                        <li><strong>Mekanisme Dada:</strong> Kontraksi *musculus intercostalis externus* mengelevasi rongga dada, menurunkan tekanan intrapleural, memaksa udara atmosfer masuk secara gradasi tekanan.</li>
+                        <li><strong>Mekanisme Perut:</strong> Kontraksi *diafragma* mengubah struktur kubah menjadi datar, mengekspansi volume paru secara vertikal.</li>
+                    </ul>
+                </div>
+                <div class="reveal-card">
+                    <h3 style="color: var(--secondary-glow); margin-bottom: 10px;">2. Regulasi Frekuensi Pernapasan</h3>
+                    <p style="font-size:14px;">Pusat kendali pernapasan di *medulla oblongata* dan *pons* mendeteksi fluktuasi kadar pH darah dan kadar CO₂ via kemoreseptor sentral:</p>
+                    <ul style="margin-top:10px; font-size:14px;">
+                        <li><strong>Metabolisme Seluler:</strong> Aktivitas fisik ekstrem meningkatkan produksi asam laktat dan CO₂, memicu lonjakan frekuensi napas (Hiperventilasi) demi menjaga kestabilan pH darah.</li>
+                        <li><strong>Asma Bronkiale:</strong> Inflamasi kronis mukosa bronkus memicu spasme otot polos saluran napas, membatasi aliran volume udara tidal secara signifikan.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="prosedur-sec" class="content-section">
+            <div class="reveal-card">
+                <h2>📝 Protokol Operasional Laboratorium Virtual</h2>
+                <p style="margin-bottom: 20px;">Silakan ikuti instruksi teknis di bawah ini untuk mengeksekusi analisis data respirasi:</p>
+                <ol style="display: flex; flex-direction: column; gap: 12px; padding-left: 15px;">
+                    <li>Arahkan navigasi ke tab <strong style="color: var(--primary-glow);">Simulasi</strong>.</li>
+                    <li>Konfigurasikan variabel independen pertama pada dropdown <strong>Pilih Aktivitas</strong> (Kondisi Basal/Istirahat hingga Aktivitas Berat).</li>
+                    <li>Tentukan kondisi fisiologis paru-paru subjek uji pada opsi <strong>Kondisi Tubuh</strong> (Skenario Sehat vs Skenario Restriksi/Asma).</li>
+                    <li>Klik trigger button <strong style="color: var(--primary-glow);">▶ Inisiasi Simulasi</strong> untuk menjalankan kalkulasi algoritma grafik kembang-kempis organ.</li>
+                    <li>Amati visualisasi data empiris pada panel indikator angka **HUD Monitor**.</li>
+                    <li>Gunakan tombol <strong style="color: var(--accent-red);">🔄 Reset Sistem</strong> untuk membersihkan *cache* data kalkulasi sebelum melakukan eksperimen skenario berikutnya.</li>
+                </ol>
+            </div>
+        </div>
+
+        <div id="simulasi-sec" class="content-section">
+            <div class="sim-grid">
+                <div class="glass-panel" style="display:flex; flex-direction:column; justify-content: space-between;">
+                    <div>
+                        <h3 style="font-size: 18px; margin-bottom: 20px; letter-spacing: 0.5px;">Control Unit</h3>
+                        <div class="control-group">
+                            <label>Pilih Aktivitas</label>
+                            <select id="act-input" onchange="calcRespiration()">
+                                <option value="rest">Istirahat (Duduk)</option>
+                                <option value="walk">Berjalan Santai</option>
+                                <option value="run">Berlari Cepat</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>Kondisi Tubuh</label>
+                            <select id="health-input" onchange="calcRespiration()">
+                                <option value="normal">Normal / Sehat</option>
+                                <option value="asthma">Serangan Asma</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="action-btn start-btn" onclick="toggleEngine()">▶ Inisiasi Simulasi</button>
+                        <button class="action-btn reset-btn" onclick="resetEngine()">🔄 Reset Sistem</button>
+                    </div>
+                </div>
+
+                <div class="display-stage">
+                    <div class="lungs-box">
+                        <div id="left-lung" class="lung-art left"></div>
+                        <div id="right-lung" class="lung-art right"></div>
+                    </div>
+                    
+                    <div class="hud-monitor">
+                        <div class="hud-card">
+                            <div id="hud-freq" class="hud-num">0</div>
+                            <div class="hud-label">Frekuensi (BPM)</div>
+                        </div>
+                        <div style="width: 1px; background: var(--border-color);"></div>
+                        <div class="hud-card">
+                            <div id="hud-vol" class="hud-num">0</div>
+                            <div class="hud-label">Volume Tidal (mL)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="lkpd-sec" class="content-section">
+            <div class="reveal-card">
+                <h2>📋 Lembar Kerja Digital Peserta Didik (LKPD)</h2>
+                <p style="margin-bottom: 20px;">Gunakan tabel komparatif di bawah ini untuk menganalisis keterkaitan variabel pulmonari:</p>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Kondisi Patologis</th>
+                            <th>Variabel Aktivitas</th>
+                            <th>Frekuensi (Napas/Menit)</th>
+                            <th>Volume Udara Tidal (mL)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td rowspan="3" style="font-weight:600;">Fisiologis Normal</td>
+                            <td>Istirahat</td>
+                            <td>14 - 16</td>
+                            <td>500</td>
+                        </tr>
+                        <tr>
+                            <td>Berjalan</td>
+                            <td>22 - 25</td>
+                            <td>750</td>
+                        </tr>
+                        <tr>
+                            <td>Berlari</td>
+                            <td>35 - 40</td>
+                            <td>1200</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="3" style="color: var(--accent-red); font-weight:600;">Restriksi / Asma</td>
+                            <td>Istirahat</td>
+                            <td>24 - 28</td>
+                            <td>300</td>
+                        </tr>
+                        <tr>
+                            <td>Berjalan</td>
+                            <td>32 - 36</td>
+                            <td>400</td>
+                        </tr>
+                        <tr>
+                            <td>Berlari</td>
+                            <td>45 - 50</td>
+                            <td>550</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="grid-2">
+                <div class="reveal-card">
+                    <h4 style="color: var(--primary-glow); margin-bottom: 8px;">Problem Solving 1</h4>
+                    <p style="font-size:14px;">Bagaimana korelasi peningkatan katabolisme glukosa pada jaringan otot skelet terhadap akselerasi ritme kerja konduksi *medulla oblongata* saat berlari? Jelaskan secara biokimiawi!</p>
+                </div>
+                <div class="reveal-card">
+                    <h4 style="color: var(--secondary-glow); margin-bottom: 8px;">Problem Solving 1</h4>
+                    <p style="font-size:14px;">Bagaimana korelasi peningkatan katabolisme glukosa pada jaringan otot skelet terhadap akselerasi ritme kerja konduksi *medulla oblongata* saat berlari? Jelaskan secara biokimiawi!</p>
+                </div>
+                <div class="reveal-card">
+                    <h4 style="color: var(--secondary-glow); margin-bottom: 8px;">Problem Solving 2</h4>
+                    <p style="font-size:14px;">Evaluasi mengapa respon kompensasi tubuh penderita asma cenderung memilih peningkatan frekuensi ventilasi (*tachypnea*) dangkal daripada memperbesar volume kedalaman kapasitas paru!</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="dev-sec" class="content-section">
+            <div class="dev-badge">
+                <h3 style="font-size: 24px; font-weight: 800; margin-bottom: 5px;">Ardhiansyah Emir A.</h3>
+                <p style="color: var(--primary-glow); font-size: 14px; font-weight: 700; letter-spacing: 2px; margin-bottom: 15px;">LEAD INTERACTIVE DEVELOPER</p>
+                <p style="font-size: 14px;">Siswa SMAN 1 Kepanjen — Spesialisasi Aplikasi Edukasi Digital Berbasis Core Web Standard Tanpa Lib Eksternal.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let isEngineRunning = false;
+
+        // Sound Engine (Web Audio API)
+        function triggerSound(style) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            if (style === 'tap') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(1000, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.06);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.06);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.06);
+            } else if (style === 'wipe') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(350, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.12);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.12);
+            } else if (style === 'switch') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(550, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(650, audioCtx.currentTime + 0.03);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.03);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.03);
+            }
+        }
+
+        // Section Switcher Logic
+        function switchSection(targetId, e) {
+            triggerSound('switch');
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(targetId).classList.add('active');
+            e.target.classList.add('active');
+            
+            // Re-trigger scroll reveal hook
+            triggerScrollReveal();
+        }
+
+        // Calculation Algorithm Fisiologi Respirasi
+        function calcRespiration() {
+            if (!isEngineRunning) return;
+            
+            const act = document.getElementById('act-input').value;
+            const health = document.getElementById('health-input').value;
+            
+            let rate = 16;
+            let volume = 500;
+            
+            if (health === 'normal') {
+                if (act === 'rest') { rate = 15; volume = 500; }
+                else if (act === 'walk') { rate = 24; volume = 750; }
+                else if (act === 'run') { rate = 38; volume = 1200; }
+            } else {
+                if (act === 'rest') { rate = 26; volume = 300; }
+                else if (act === 'walk') { rate = 34; volume = 400; }
+                else if (act === 'run') { rate = 48; volume = 550; }
+            }
+            
+            document.getElementById('hud-freq').innerText = rate;
+            document.getElementById('hud-vol').innerText = volume;
+            
+            // Set dynamic CSS property for lungs animation speed
+            const cycleDuration = 60 / rate;
+            document.documentElement.style.setProperty('--breathe-duration', `${cycleDuration}s`);
+        }
+
+        function toggleEngine() {
+            triggerSound('tap');
+            const startBtn = document.querySelector('.start-btn');
+            const lungL = document.getElementById('left-lung');
+            const lungR = document.getElementById('right-lung');
+            
+            if (!isEngineRunning) {
+                isEngineRunning = true;
+                startBtn.innerText = "⏸ Pause Engine";
+                startBtn.style.background = "linear-gradient(135deg, #f59e0b, #d97706)";
+                lungL.style.animationPlayState = "running";
+                lungR.style.animationPlayState = "running";
+                calcRespiration();
+            } else {
+                isEngineRunning = false;
+                startBtn.innerText = "▶ Inisiasi Simulasi";
+                startBtn.style.background = "linear-gradient(135deg, #00f2fe, #4facfe)";
+                lungL.style.animationPlayState = "paused";
+                lungR.style.animationPlayState = "paused";
+            }
+        }
+
+        function resetEngine() {
+            triggerSound('wipe');
+            isEngineRunning = false;
+            
+            const startBtn = document.querySelector('.start-btn');
+            startBtn.innerText = "▶ Inisiasi Simulasi";
+            startBtn.style.background = "linear-gradient(135deg, #00f2fe, #4facfe)";
+            
+            const lungL = document.getElementById('left-lung');
+            const lungR = document.getElementById('right-lung');
+            lungL.style.animationPlayState = "paused";
+            lungR.style.animationPlayState = "paused";
+            
+            document.getElementById('act-input').value = "rest";
+            document.getElementById('health-input').value = "normal";
+            document.getElementById('hud-freq').innerText = "0";
+            document.getElementById('hud-vol').innerText = "0";
+            document.documentElement.style.setProperty('--breathe-duration', `4s`);
+        }
+
+        // SCROLL REVEAL (FLOATING ANIMATION) USING INTERSECTION OBSERVER
+        function triggerScrollReveal() {
+            const cards = document.querySelectorAll('.reveal-card');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            cards.forEach(card => {
+                card.classList.remove('visible'); // reset state
+                observer.observe(card);
+            });
+        }
+
+        // Initialize on Load
+        window.addEventListener('DOMContentLoaded', () => {
+            triggerScrollReveal();
+        });
+    </script>
+</body>
+</html>
